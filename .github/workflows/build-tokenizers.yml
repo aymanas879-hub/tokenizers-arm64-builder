@@ -20,17 +20,17 @@ jobs:
         sudo apt update
         sudo apt install -y build-essential cmake rustc cargo pkg-config
         
-    - name: Build tokenizers from source for armv8l
+    - name: Build tokenizers from source for armv8-a
       run: |
         mkdir -p wheels
         pip install --upgrade pip wheel setuptools
         git clone https://github.com/huggingface/tokenizers
         cd tokenizers/bindings/python
-        export CFLAGS="-march=armv8l"
-        export CXXFLAGS="-march=armv8l"
+        export CFLAGS="-march=armv8-a"
+        export CXXFLAGS="-march=armv8-a"
         pip wheel . --wheel-dir=../../../wheels/
     
-    - name: Rename wheel to match armv8l
+    - name: Rename wheel
       run: |
         cd wheels
         for file in tokenizers-*.whl; do
