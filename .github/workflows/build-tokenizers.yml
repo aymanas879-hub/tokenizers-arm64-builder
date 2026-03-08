@@ -1,4 +1,4 @@
-name: Build Tokenizers ARM64
+name: Build Tokenizers for armv8l
 
 on:
   workflow_dispatch:
@@ -10,9 +10,6 @@ jobs:
     runs-on: ubuntu-24.04-arm
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
     - name: Set up Python 3.13
       uses: actions/setup-python@v5
       with:
@@ -23,16 +20,26 @@ jobs:
         sudo apt update
         sudo apt install -y build-essential cmake rustc cargo pkg-config
         
-    - name: Build tokenizers for ARM64
+    - name: Build tokenizers from source for armv8l
       run: |
         mkdir -p wheels
         pip install --upgrade pip wheel setuptools
         git clone https://github.com/huggingface/tokenizers
         cd tokenizers/bindings/python
+        export CFLAGS="-march=armv8l"
+        export CXXFLAGS="-march=armv8l"
         pip wheel . --wheel-dir=../../../wheels/
+    
+    - name: Rename wheel to match armv8l
+      run: |
+        cd wheels
+        for file in tokenizers-*.whl; do
+          newname=$(echo $file | sed 's/aarch64/armv8l/g')
+          mv "$file" "$newname"
+        done
     
     - name: Upload wheel
       uses: actions/upload-artifact@v4
       with:
-        name: tokenizers-arm64-wheel
-        path: ./wheels/*.whl
+        name: tokenizers-armv8l-wheel
+        path: wheels/*.whl
